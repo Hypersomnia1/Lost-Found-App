@@ -1,0 +1,125 @@
+﻿//
+//  claimedCode.swift
+//  finder2work
+//
+//  Created by Harrison Fei on 1/16/18.
+//  Copyright © 2018 Harrison Fei. All rights reserved.
+//
+
+import UIKit
+
+class claimedCode: UIViewController , UITableViewDataSource, UITableViewDelegate{
+    
+    @IBOutlet weak var tableitem: UITableView!
+    /*    @IBAction func refresh(_ sender: Any) {
+        get()
+        
+    } */
+    var values2 = [claimedItem]()
+    //var values:NSArray = []
+    
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        tableitem.delegate = self
+        tableitem.dataSource = self
+        get()
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    func get(){
+        let myURLString = "http://c-76-97-180-216.hsd1.ga.comcast.net:8080/CrunchifyTutorials/displayItems.jsp?ClaimedOnly=Yes"
+        guard let myURL = URL(string: myURLString) else {
+            print("Error: \(myURLString) doesn't seem to be a valid URL")
+            return
+        }
+        
+        do {
+            
+            let data = try! Data(contentsOf: myURL)
+            print(data)
+            let parsedData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as! [AnyObject]
+            
+            //print(parsedData)
+           
+            values2.removeAll()
+            for eachElement in parsedData{
+                let eachItem = eachElement as! [String: Any]
+                let id = eachItem["id"] as! String
+                let name = eachItem["name"] as! String
+                let location = eachItem["location"] as! String
+                let description = eachItem["description"] as! String
+                let foundDateTime = eachItem["foundDateTime"] as! String
+                let submitby = eachItem["submittedBy"] as! String
+                let claimby = eachItem["claimedBy"] as! String
+                let claimon = eachItem["claimedDateTime"] as! String
+                
+                self.values2.append(claimedItem(id:id, name:name, location:location, description:description, foundDateTime:foundDateTime, submitby:submitby, claimby:claimby, claimon:claimon))
+            }
+            
+            self.tableitem.reloadData()
+            print("Count1: \(values2.count)")
+            
+        } catch let error {
+            print("Error: \(error)")
+        }
+        
+    }
+    // end get()
+    
+    
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        print("Count2: \(values2.count)")
+        return values2.count
+    }
+    
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        print ("In tableView()")
+        let cell = tableitem.dequeueReusableCell(withIdentifier: "claiminfo", for: indexPath as IndexPath)
+        let maindata = values2[indexPath.row]
+      
+        cell.textLabel?.text = maindata.name
+        cell.detailTextLabel?.text = maindata.foundDateTime
+      
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        //   let selectedIndex = indexPath.row
+        performSegue(withIdentifier: "claimtoinfo", sender: self)
+    }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    if let destination = segue.destination as? claimcelldetail{
+            destination.rowdata = values2[(tableitem.indexPathForSelectedRow?.row)!]
+        }
+    }
+    
+}
+
+class claimedItem{
+    var id: String
+    var name: String
+    var location: String
+    var description: String
+    var foundDateTime: String
+    var submitby: String
+    var claimby: String
+    var claimon: String
+    init(id: String, name: String, location: String, description: String, foundDateTime: String, submitby: String, claimby: String, claimon: String){
+        self.id = id
+        self.name = name
+        self.location = location
+        self.description = description
+        self.foundDateTime = foundDateTime
+        self.submitby = submitby
+        self.claimby = claimby
+        self.claimon = claimon
+    }
+    
+}
+

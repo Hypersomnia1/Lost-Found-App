@@ -1,0 +1,81 @@
+﻿//
+//  additem.swift
+//  finder2work
+//
+//  Created by Harrison Fei on 1/9/18.
+//  Copyright © 2018 Harrison Fei. All rights reserved.
+//
+
+import UIKit
+
+class additem: UIViewController {
+    
+    @IBOutlet weak var location: UITextField!
+    @IBOutlet weak var name: UITextField!
+    @IBOutlet weak var submitby: UITextField!
+    @IBOutlet weak var desc1: UITextField!
+    @IBAction func submit(_ sender: Any) {
+    
+        if (location.text != "" && name.text != "" && desc1.text != "" && submitby.text != ""){
+        //put the link of the php file here. The php file connects the mysql and swift
+        let request = NSMutableURLRequest(url: NSURL(string: "http://c-76-97-180-216.hsd1.ga.comcast.net:8080/CrunchifyTutorials/saveItem.jsp")! as URL)
+        request.httpMethod = "POST"
+        
+        let postString = "name=\(name.text!)&location=\(location.text!)&submitby=\(submitby.text!)&description=\(desc1.text!)"
+        print (postString)
+        
+        request.httpBody = postString.data(using: String.Encoding.utf8)
+        
+        let task = URLSession.shared.dataTask(with: request as URLRequest) {
+            data, response, error in
+            
+            if error != nil {
+                print("error=\(error)")
+                return
+            }
+            
+            print("response = \(response)")
+            
+            let responseString = NSString(data: data!, encoding: String.Encoding.utf8.rawValue)
+            print("responseString = \(responseString)")
+        }
+        task.resume()
+        
+        
+        let alertController = UIAlertController(title: "Item", message:
+            "Successfully Added", preferredStyle: UIAlertControllerStyle.alert)
+        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default,handler: { action in self.performSegue(withIdentifier: "goback", sender: self) }))
+        
+        self.present(alertController, animated: true, completion: nil)
+        
+        name.text = ""
+        location.text = ""
+        submitby.text = ""
+        desc1.text = ""
+        }
+        else{
+            
+            let alertController = UIAlertController(title: "Error", message:
+                "Please fill all the boxes", preferredStyle: UIAlertControllerStyle.alert)
+            alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default,handler: nil))
+            
+            self.present(alertController, animated: true, completion: nil)
+        }
+        
+        
+    
+    
+    }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    
+}
+
